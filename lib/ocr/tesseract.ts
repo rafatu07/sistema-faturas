@@ -21,8 +21,8 @@ export const initializeOCR = async (): Promise<Worker> => {
   }
 };
 
-// Converter File/Blob para ImageData ou URL
-const prepareImage = async (imageFile: File | Blob | string): Promise<string | ImageData> => {
+// Converter File/Blob para URL string
+const prepareImage = async (imageFile: File | Blob | string): Promise<string> => {
   // Se já é uma string (URL), retornar diretamente
   if (typeof imageFile === 'string') {
     return imageFile;
@@ -76,11 +76,11 @@ export const processImage = async (
       ocrWorker = await initializeOCR();
     }
     
-    // Preparar a imagem
+    // Preparar a imagem (sempre retorna string URL)
     const imageSource = await prepareImage(imageFile);
     
     // Se foi criada uma URL blob, armazenar para limpar depois
-    if (typeof imageSource === 'string' && imageSource.startsWith('blob:')) {
+    if (imageSource.startsWith('blob:')) {
       imageUrl = imageSource;
     }
     
