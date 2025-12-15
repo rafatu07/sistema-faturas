@@ -57,25 +57,10 @@ export default function FaturaForm({
     if (extractedData && !fatura) {
       if (extractedData.tipo) setTipo(extractedData.tipo);
       if (extractedData.vencimento) {
-        // Converter vencimento para Date se necessário
-        let vencimentoDate: Date;
-        if (extractedData.vencimento instanceof Date) {
-          vencimentoDate = extractedData.vencimento;
-        } else if (typeof extractedData.vencimento === 'string') {
-          // Converter string dd/MM/yyyy para Date
-          const parts = extractedData.vencimento.split(/[\/\-]/);
-          if (parts.length === 3) {
-            let day = parseInt(parts[0]);
-            let month = parseInt(parts[1]) - 1;
-            let year = parseInt(parts[2]);
-            if (year < 100) year += 2000;
-            vencimentoDate = new Date(year, month, day);
-          } else {
-            vencimentoDate = new Date(extractedData.vencimento);
-          }
-        } else {
-          vencimentoDate = new Date(extractedData.vencimento);
-        }
+        // extractedData.vencimento já é Date
+        const vencimentoDate = extractedData.vencimento instanceof Date 
+          ? extractedData.vencimento 
+          : new Date(extractedData.vencimento);
         
         if (!isNaN(vencimentoDate.getTime())) {
           setVencimento(formatDate(vencimentoDate, 'yyyy-MM-dd'));
@@ -150,26 +135,14 @@ export default function FaturaForm({
       if (extractedData?.vencimento) {
         console.log('Convertendo vencimento extraído:', extractedData.vencimento, 'Tipo:', typeof extractedData.vencimento);
         
+        // extractedData.vencimento já é Date
         if (extractedData.vencimento instanceof Date) {
           vencimentoExtraido = extractedData.vencimento;
-        } else if (typeof extractedData.vencimento === 'string') {
-          try {
-            const parts = extractedData.vencimento.split(/[\/\-]/);
-            if (parts.length === 3) {
-              let day = parseInt(parts[0]);
-              let month = parseInt(parts[1]) - 1;
-              let year = parseInt(parts[2]);
-              if (year < 100) year += 2000;
-              vencimentoExtraido = new Date(year, month, day);
-              if (isNaN(vencimentoExtraido.getTime())) {
-                console.warn('Vencimento extraído inválido, removendo');
-                vencimentoExtraido = undefined;
-              } else {
-                console.log('Vencimento extraído convertido:', vencimentoExtraido);
-              }
-            }
-          } catch (e) {
-            console.warn('Erro ao converter vencimento extraído:', e);
+        } else {
+          // Fallback: tentar converter se não for Date (não deveria acontecer, mas por segurança)
+          vencimentoExtraido = new Date(extractedData.vencimento as any);
+          if (isNaN(vencimentoExtraido.getTime())) {
+            console.warn('Vencimento extraído inválido, removendo');
             vencimentoExtraido = undefined;
           }
         }
