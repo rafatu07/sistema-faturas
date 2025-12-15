@@ -17,19 +17,28 @@ const COLLECTION = 'faturas';
 // Converter Firestore para modelo
 const firestoreToModel = (data: FaturaFirestore): Fatura => {
   const result: Fatura = {
-    ...data,
+    id: data.id,
+    tipo: data.tipo,
+    valorTotal: data.valorTotal,
+    arquivoUrl: data.arquivoUrl,
+    userId: data.userId,
     vencimento: timestampToDate(data.vencimento),
     createdAt: timestampToDate(data.createdAt),
     updatedAt: timestampToDate(data.updatedAt),
   };
   
-  if (data.dadosExtraidos?.vencimento) {
+  // Converter dadosExtraidos se existir
+  if (data.dadosExtraidos) {
     result.dadosExtraidos = {
-      ...data.dadosExtraidos,
-      vencimento: timestampToDate(data.dadosExtraidos.vencimento),
+      tipo: data.dadosExtraidos.tipo,
+      valorTotal: data.dadosExtraidos.valorTotal,
+      confiabilidade: data.dadosExtraidos.confiabilidade,
     };
-  } else if (data.dadosExtraidos) {
-    result.dadosExtraidos = data.dadosExtraidos;
+    
+    // Converter vencimento de Timestamp para Date se existir
+    if (data.dadosExtraidos.vencimento) {
+      result.dadosExtraidos.vencimento = timestampToDate(data.dadosExtraidos.vencimento);
+    }
   }
   
   return result;
