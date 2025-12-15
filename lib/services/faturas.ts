@@ -37,12 +37,6 @@ const firestoreToModel = (data: FaturaFirestore): Fatura => {
 
 // Converter modelo para Firestore
 const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
-  console.log('=== modelToFirestore ===');
-  console.log('Data recebida:', data);
-  console.log('Tipo de vencimento:', typeof data.vencimento, data.vencimento instanceof Date);
-  console.log('createdAt:', data.createdAt, 'Tipo:', typeof data.createdAt);
-  console.log('updatedAt:', data.updatedAt, 'Tipo:', typeof data.updatedAt);
-  
   // Criar cópia limpa, removendo campos inválidos
   const result: any = {};
   
@@ -55,14 +49,12 @@ const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
   // Não copiar createdAt/updatedAt aqui - serão adicionados pelo serverTimestamp
   
   if (data.vencimento) {
-    console.log('Convertendo vencimento principal:', data.vencimento, 'Tipo:', typeof data.vencimento);
     try {
       // Validar que é Date antes de converter
       if (!(data.vencimento instanceof Date)) {
         throw new Error(`Vencimento deve ser Date, recebido: ${typeof data.vencimento}`);
       }
       result.vencimento = dateToTimestamp(data.vencimento);
-      console.log('Vencimento convertido com sucesso');
     } catch (error) {
       console.error('ERRO ao converter vencimento principal:', error);
       throw error;
@@ -70,7 +62,6 @@ const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
   }
   // Processar dadosExtraidos se existir
   if (data.dadosExtraidos) {
-    console.log('Processando dadosExtraidos:', data.dadosExtraidos);
     result.dadosExtraidos = {
       tipo: data.dadosExtraidos.tipo,
       valorTotal: data.dadosExtraidos.valorTotal,
@@ -79,7 +70,6 @@ const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
     
     // Processar vencimento dos dados extraídos apenas se for válido
     if (data.dadosExtraidos.vencimento) {
-      console.log('Convertendo vencimento dos dados extraídos:', data.dadosExtraidos.vencimento, 'Tipo:', typeof data.dadosExtraidos.vencimento);
       const vencimentoExtraido = data.dadosExtraidos.vencimento;
       let vencimentoDate: Date | null = null;
       
@@ -105,13 +95,9 @@ const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
       if (vencimentoDate && !isNaN(vencimentoDate.getTime())) {
         try {
           result.dadosExtraidos.vencimento = dateToTimestamp(vencimentoDate);
-          console.log('Vencimento dos dados extraídos convertido com sucesso');
         } catch (error) {
-          console.warn('Erro ao converter vencimento dos dados extraídos, ignorando:', error);
           // Não adicionar vencimento se a conversão falhar
         }
-      } else {
-        console.warn('Vencimento dos dados extraídos inválido, ignorando:', vencimentoExtraido);
       }
     }
   }
@@ -122,24 +108,16 @@ const modelToFirestore = (data: Partial<Fatura>): Partial<FaturaFirestore> => {
 export const createFatura = async (
   fatura: Omit<Fatura, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> => {
-  console.log('=== createFatura ===');
-  console.log('Fatura recebida:', fatura);
-  console.log('Tipo de vencimento:', typeof fatura.vencimento, fatura.vencimento instanceof Date);
-  
   // Validar que vencimento é Date
   if (!(fatura.vencimento instanceof Date)) {
-    console.error('ERRO: vencimento não é Date:', fatura.vencimento, typeof fatura.vencimento);
     throw new Error('Data de vencimento deve ser um objeto Date');
   }
   
   if (isNaN(fatura.vencimento.getTime())) {
-    console.error('ERRO: vencimento é inválido:', fatura.vencimento);
     throw new Error('Data de vencimento inválida');
   }
   
-  console.log('Dados antes de modelToFirestore:', fatura);
   const firestoreData = modelToFirestore(fatura);
-  console.log('Dados após modelToFirestore:', firestoreData);
   
   // Adicionar timestamps do servidor
   const finalData = {
@@ -149,7 +127,6 @@ export const createFatura = async (
   };
   
   const docId = await createDocument(COLLECTION, finalData as any);
-  console.log('Fatura criada com ID:', docId);
   return docId;
 };
 

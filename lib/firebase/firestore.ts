@@ -26,8 +26,6 @@ export const timestampToDate = (timestamp: Timestamp | Date | undefined): Date =
 
 // Helper para converter Date para Timestamp do Firestore
 export const dateToTimestamp = (date: Date | string | number | null | undefined): Timestamp => {
-  console.log('dateToTimestamp chamado com:', date, 'Tipo:', typeof date, 'É Date?', date instanceof Date);
-  
   // Validar entrada
   if (date === null || date === undefined) {
     throw new Error('Data não pode ser null ou undefined');
@@ -64,7 +62,6 @@ export const dateToTimestamp = (date: Date | string | number | null | undefined)
         let year = parseInt(parts[2]);
         if (year < 100) year += 2000;
         dateObj = new Date(year, month, day);
-        console.log('String convertida (dd/MM/yyyy):', date, '→', dateObj);
       } else {
         dateObj = new Date(date);
       }
@@ -75,16 +72,13 @@ export const dateToTimestamp = (date: Date | string | number | null | undefined)
   } else if (typeof date === 'number') {
     dateObj = new Date(date);
   } else {
-    console.error('Tipo não suportado:', typeof date, date);
     throw new Error(`Tipo de data não suportado: ${typeof date}`);
   }
   
   if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
-    console.error('Data inválida após conversão:', dateObj, 'Original:', date);
     throw new Error(`Data inválida para conversão: ${date}`);
   }
   
-  console.log('Convertendo para Timestamp:', dateObj);
   return Timestamp.fromDate(dateObj);
 };
 

@@ -79,12 +79,7 @@ export default function FaturaForm({
     setLoading(true);
 
     try {
-      console.log('=== INÍCIO DO SALVAMENTO ===');
-      console.log('Dados do formulário:', { tipo, vencimento, valorTotal });
-      console.log('extractedData:', extractedData);
-
       const valorTotalNum = parseCurrency(valorTotal);
-      console.log('Valor total parseado:', valorTotalNum);
 
       if (valorTotalNum <= 0) {
         throw new Error('Valor total deve ser maior que zero');
@@ -97,7 +92,6 @@ export default function FaturaForm({
       // Converter string de data para Date object
       // vencimento sempre é string (vem do input type="date")
       let vencimentoDate: Date;
-      console.log('Tipo de vencimento:', typeof vencimento, vencimento);
       
       if (!vencimento || typeof vencimento !== 'string') {
         throw new Error('Data de vencimento é obrigatória');
@@ -106,7 +100,6 @@ export default function FaturaForm({
       // Tentar formato yyyy-MM-dd primeiro (formato padrão do input type="date")
       if (vencimento.match(/^\d{4}-\d{2}-\d{2}$/)) {
         vencimentoDate = new Date(vencimento + 'T00:00:00');
-        console.log('Tentando formato yyyy-MM-dd:', vencimento, '→', vencimentoDate);
       } else {
         // Tentar formato brasileiro dd/MM/yyyy
         const parts = vencimento.split(/[\/\-]/);
@@ -116,7 +109,6 @@ export default function FaturaForm({
           let year = parseInt(parts[2]);
           if (year < 100) year += 2000;
           vencimentoDate = new Date(year, month, day);
-          console.log('Tentando formato dd/MM/yyyy:', vencimento, '→', vencimentoDate);
         } else {
           throw new Error('Formato de data inválido: ' + vencimento);
         }
@@ -126,13 +118,9 @@ export default function FaturaForm({
         throw new Error('Data inválida: ' + vencimento);
       }
 
-      console.log('Vencimento convertido:', vencimentoDate, 'Válido:', !isNaN(vencimentoDate.getTime()));
-
       // Converter vencimento dos dados extraídos se necessário
       let vencimentoExtraido: Date | undefined;
       if (extractedData?.vencimento) {
-        console.log('Convertendo vencimento extraído:', extractedData.vencimento, 'Tipo:', typeof extractedData.vencimento);
-        
         // extractedData.vencimento já é Date
         if (extractedData.vencimento instanceof Date) {
           vencimentoExtraido = extractedData.vencimento;
@@ -140,7 +128,6 @@ export default function FaturaForm({
           // Fallback: tentar converter se não for Date (não deveria acontecer, mas por segurança)
           vencimentoExtraido = new Date(extractedData.vencimento as any);
           if (isNaN(vencimentoExtraido.getTime())) {
-            console.warn('Vencimento extraído inválido, removendo');
             vencimentoExtraido = undefined;
           }
         }
@@ -162,12 +149,7 @@ export default function FaturaForm({
           : undefined,
       };
 
-      console.log('Dados finais para salvar:', faturaData);
-      console.log('Tipo de vencimento nos dados:', typeof faturaData.vencimento, faturaData.vencimento instanceof Date);
-
       await onSubmit(faturaData);
-      
-      console.log('=== SALVAMENTO CONCLUÍDO ===');
 
       // Reset form
       setTipo('EDP');
