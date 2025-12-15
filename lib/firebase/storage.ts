@@ -5,6 +5,7 @@ export const uploadFile = async (
   file: File,
   path: string
 ): Promise<string> => {
+  if (!storage) throw new Error('Firebase Storage não está inicializado');
   const storageRef = ref(storage, path);
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
@@ -12,11 +13,13 @@ export const uploadFile = async (
 };
 
 export const deleteFile = async (path: string): Promise<void> => {
+  if (!storage) throw new Error('Firebase Storage não está inicializado');
   const storageRef = ref(storage, path);
   await deleteObject(storageRef);
 };
 
 export const getFileUrl = async (path: string): Promise<string> => {
+  if (!storage) throw new Error('Firebase Storage não está inicializado');
   const storageRef = ref(storage, path);
   return await getDownloadURL(storageRef);
 };
