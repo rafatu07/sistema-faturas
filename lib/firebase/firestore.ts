@@ -132,7 +132,7 @@ export const updateDocument = async <T extends Record<string, any>>(
 ): Promise<void> => {
   if (!db) throw new Error('Firestore não está inicializado');
   const docRef = doc(db, collectionName, docId);
-  await updateDoc(docRef, data);
+  await updateDoc(docRef, data as any);
 };
 
 // Helper genérico para deletar um documento
