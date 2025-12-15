@@ -58,11 +58,22 @@ export const processImage = async (
   let imageUrl: string | null = null;
   
   try {
-    const ocrWorker = await initializeOCR();
+    // Se o idioma solicitado for diferente de 'por', criar um novo worker
+    // Caso contrário, usar o worker padrão já inicializado
+    let ocrWorker: Worker;
     
     if (options?.lang && options.lang !== 'por') {
-      await ocrWorker.loadLanguage(options.lang);
-      await ocrWorker.initialize(options.lang);
+      // Criar um novo worker para o idioma solicitado
+      ocrWorker = await createWorker(options.lang, 1, {
+        logger: (m) => {
+          if (m.status === 'error') {
+            console.error('OCR Error:', m);
+          }
+        },
+      });
+    } else {
+      // Usar o worker padrão (português)
+      ocrWorker = await initializeOCR();
     }
     
     // Preparar a imagem
@@ -76,11 +87,16 @@ export const processImage = async (
     // Processar com OCR
     const { data } = await ocrWorker.recognize(imageSource);
     
+    // Se criamos um worker temporário para outro idioma, terminá-lo
+    if (options?.lang && options.lang !== 'por') {
+      await ocrWorker.terminate();
+    }
+    
     return data.text;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro ao processar imagem:', error);
     
-    if (error.message) {
+    if (error instanceof Error && error.message) {
       throw error;
     }
     throw new Error('Erro ao processar a imagem. Verifique se o arquivo é uma imagem válida.');
