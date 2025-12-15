@@ -95,37 +95,35 @@ export default function FaturaForm({
       }
 
       // Converter string de data para Date object
+      // vencimento sempre é string (vem do input type="date")
       let vencimentoDate: Date;
       console.log('Tipo de vencimento:', typeof vencimento, vencimento);
       
-      if (vencimento instanceof Date) {
-        vencimentoDate = vencimento;
-        console.log('Vencimento já é Date:', vencimentoDate);
-      } else if (typeof vencimento === 'string') {
-        // Tentar formato yyyy-MM-dd primeiro
-        if (vencimento.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          vencimentoDate = new Date(vencimento + 'T00:00:00');
-          console.log('Tentando formato yyyy-MM-dd:', vencimento, '→', vencimentoDate);
-        } else {
-          // Tentar formato brasileiro dd/MM/yyyy
-          const parts = vencimento.split(/[\/\-]/);
-          if (parts.length === 3) {
-            let day = parseInt(parts[0]);
-            let month = parseInt(parts[1]) - 1;
-            let year = parseInt(parts[2]);
-            if (year < 100) year += 2000;
-            vencimentoDate = new Date(year, month, day);
-            console.log('Tentando formato dd/MM/yyyy:', vencimento, '→', vencimentoDate);
-          } else {
-            throw new Error('Formato de data inválido: ' + vencimento);
-          }
-        }
-        
-        if (isNaN(vencimentoDate.getTime())) {
-          throw new Error('Data inválida: ' + vencimento);
-        }
+      if (!vencimento || typeof vencimento !== 'string') {
+        throw new Error('Data de vencimento é obrigatória');
+      }
+      
+      // Tentar formato yyyy-MM-dd primeiro (formato padrão do input type="date")
+      if (vencimento.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        vencimentoDate = new Date(vencimento + 'T00:00:00');
+        console.log('Tentando formato yyyy-MM-dd:', vencimento, '→', vencimentoDate);
       } else {
-        throw new Error('Tipo de vencimento não suportado: ' + typeof vencimento);
+        // Tentar formato brasileiro dd/MM/yyyy
+        const parts = vencimento.split(/[\/\-]/);
+        if (parts.length === 3) {
+          let day = parseInt(parts[0]);
+          let month = parseInt(parts[1]) - 1;
+          let year = parseInt(parts[2]);
+          if (year < 100) year += 2000;
+          vencimentoDate = new Date(year, month, day);
+          console.log('Tentando formato dd/MM/yyyy:', vencimento, '→', vencimentoDate);
+        } else {
+          throw new Error('Formato de data inválido: ' + vencimento);
+        }
+      }
+      
+      if (isNaN(vencimentoDate.getTime())) {
+        throw new Error('Data inválida: ' + vencimento);
       }
 
       console.log('Vencimento convertido:', vencimentoDate, 'Válido:', !isNaN(vencimentoDate.getTime()));
