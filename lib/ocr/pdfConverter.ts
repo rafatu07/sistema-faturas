@@ -40,6 +40,7 @@ export const pdfToImage = async (file: File, pageNumber: number = 1): Promise<Bl
         const renderContext = {
           canvasContext: context,
           viewport: viewport,
+          canvas: canvas,
         };
         
         await page.render(renderContext).promise;
@@ -100,6 +101,7 @@ export const pdfToImageDataURL = async (file: File, pageNumber: number = 1): Pro
         const renderContext = {
           canvasContext: context,
           viewport: viewport,
+          canvas: canvas,
         };
         
         await page.render(renderContext).promise;
