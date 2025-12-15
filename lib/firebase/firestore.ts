@@ -90,6 +90,7 @@ export const dateToTimestamp = (date: Date | string | number | null | undefined)
 
 // Helper genérico para buscar um documento
 export const getDocument = async <T>(collectionName: string, docId: string): Promise<T | null> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   const docRef = doc(db, collectionName, docId);
   const docSnap = await getDoc(docRef);
   
@@ -103,6 +104,7 @@ export const getDocuments = async <T>(
   collectionName: string,
   constraints: QueryConstraint[] = []
 ): Promise<T[]> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   const q = query(collection(db, collectionName), ...constraints);
   const querySnapshot = await getDocs(q);
   
@@ -117,6 +119,7 @@ export const createDocument = async <T extends Record<string, any>>(
   collectionName: string,
   data: Omit<T, 'id'>
 ): Promise<string> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   const docRef = await addDoc(collection(db, collectionName), data);
   return docRef.id;
 };
@@ -127,12 +130,14 @@ export const updateDocument = async <T extends Record<string, any>>(
   docId: string,
   data: Partial<T>
 ): Promise<void> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   const docRef = doc(db, collectionName, docId);
   await updateDoc(docRef, data);
 };
 
 // Helper genérico para deletar um documento
 export const deleteDocument = async (collectionName: string, docId: string): Promise<void> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   const docRef = doc(db, collectionName, docId);
   await deleteDoc(docRef);
 };
@@ -141,11 +146,13 @@ export const deleteDocument = async (collectionName: string, docId: string): Pro
 export const executeTransaction = async <T>(
   updateFunction: (transaction: any) => Promise<T>
 ): Promise<T> => {
+  if (!db) throw new Error('Firestore não está inicializado');
   return runTransaction(db, updateFunction);
 };
 
 // Helper para batch writes
 export const createBatch = () => {
+  if (!db) throw new Error('Firestore não está inicializado');
   return writeBatch(db);
 };
 
